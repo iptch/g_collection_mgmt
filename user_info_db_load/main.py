@@ -42,7 +42,7 @@ def write_to_postgres(df):
 def write_to_sqlite(df):
     # good for debugging locally to have the same cards
     engine = create_engine(f'sqlite:///../../g_collection_be/db.sqlite3')
-    df.to_sql('core_card2', engine, if_exists='replace', index=True, index_label='id')
+    df.to_sql('core_card', engine, if_exists='replace', index=True, index_label='id')
 
 
 def main():
