@@ -78,7 +78,7 @@ def write_to_sqlite(df):
 def main():
     df_answers = read_gsheet_csv('data/data_20231028.csv')
 
-    # write_to_postgres(df_answers_adjusted)
+    # write_to_postgres(df_answers)
     write_to_sqlite(df_answers)
 
 
