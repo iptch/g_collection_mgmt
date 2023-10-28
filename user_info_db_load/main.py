@@ -36,13 +36,17 @@ def read_gsheet_csv(path):
 
 def check_emails(df_answers):
     emails = df_answers['email']
-    unclean_emails = emails[emails.str.match(r'^(\w{3})@ipt.ch$')]
+    acronym_emails = emails[emails.str.match(r'^(\w{3})@ipt\.ch$')]
+    not_ipt_emails = emails[~emails.str.contains('@ipt.ch')]
 
-    # TODO: check that all emails use @ipt.ch
-    if unclean_emails.any():
+    if acronym_emails.any():
         print('E-Mails with acronym found. Update GSheet to use full name email.')
-        print(unclean_emails)
+        print(acronym_emails)
         raise Exception('E-Mails with acronym found. Update GSheet to use full name email.')
+    if not_ipt_emails.any():
+        print('E-Mails with non-ipt domain found found. Update GSheet with ipt mail.')
+        print(not_ipt_emails)
+        raise Exception('E-Mails with non-ipt domain found found. Update GSheet with ipt mail.')
     return
 
 
