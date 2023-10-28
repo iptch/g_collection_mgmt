@@ -1,7 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
 import os
-import re
 
 
 def read_gsheet_csv(path):
@@ -27,9 +26,11 @@ def read_gsheet_csv(path):
     df_answers.reset_index(drop=True, inplace=True)
 
     df_answers['acronym'] = df_answers['acronym'].apply(str.upper)
+    df_answers['start_at_ipt'] = pd.to_datetime(df_answers['start_at_ipt'], format='%d.%m.%Y').dt.date
 
     # drop not needed columns
     df_answers.drop('Zeitstempel', axis=1, inplace=True)
+    # df_answers.drop('email', axis=1, inplace=True)
 
     return df_answers
 
@@ -48,15 +49,6 @@ def check_emails(df_answers):
         print(not_ipt_emails)
         raise Exception('E-Mails with non-ipt domain found found. Update GSheet with ipt mail.')
     return
-
-
-def clean_email(row):
-    email_raw = row['email_raw']
-
-    regex_pattern = re.compile(r'^(\w{3})@ipt.ch$')
-    if regex_pattern.match(email_raw):
-        print(f'Short email found, adjust it in Google Sheet! - {email_raw}')
-    return 'abc@ipt.ch'
 
 
 def write_to_postgres(df):
