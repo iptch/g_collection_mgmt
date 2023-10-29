@@ -30,7 +30,8 @@ def read_gsheet_csv(path):
 
     # drop not needed columns
     df_answers.drop('Zeitstempel', axis=1, inplace=True)
-    # df_answers.drop('email', axis=1, inplace=True)
+    # TODO add email column to Django model first and then include it in DB load
+    df_answers.drop('email', axis=1, inplace=True)
 
     return df_answers
 
@@ -58,17 +59,17 @@ def write_to_postgres(df):
     username = 'gcollectionadmin'
     password = os.environ['POSTGRES_PW']
     engine = create_engine(f'postgresql://{username}:{password}@{host}:{port}/{database}')
-    df.to_sql('core_card', engine, if_exists='replace', index=True, index_label='id')
+    df.to_sql('core_card', engine, if_exists='append', index=True, index_label='id')
 
 
 def write_to_sqlite(df):
     # good for debugging locally to have the same cards
     engine = create_engine(f'sqlite:///../../g_collection_be/db.sqlite3')
-    df.to_sql('core_card', engine, if_exists='replace', index=True, index_label='id')
+    df.to_sql('core_card', engine, if_exists='append', index=True, index_label='id')
 
 
 def main():
-    df_answers = read_gsheet_csv('data/data_20231028.csv')
+    df_answers = read_gsheet_csv('user_info_db_load/data/data_20231028.csv')
 
     # write_to_postgres(df_answers)
     write_to_sqlite(df_answers)
