@@ -20,10 +20,11 @@ def read_gsheet_csv(path):
                                'Was ist der beste berufliche Ratschlag, den Du je erhalten hast?': 'best_advice'},
                       inplace=True)
 
-    # ensure that full email is used
-    check_emails(df_answers)
+    # remove trailing whitespaces in all columns
+    df_answers = df_answers.map(lambda x: x.strip() if isinstance(x, str) else x)
 
-    df_answers['acronym'] = df_answers['acronym'].apply(str.upper)
+    check_emails(df_answers)
+    check_acronyms(df_answers)
 
     # select only newest entry
     df_answers = df_answers.sort_values('Zeitstempel').groupby('acronym').tail(1)
@@ -36,6 +37,15 @@ def read_gsheet_csv(path):
 
     return df_answers
 
+def check_acronyms(df_answers):
+    df_answers['acronym'] = df_answers['acronym'].apply(str.upper)
+    incorrect_acronyms = df_answers['acronym'][~df_answers['acronym'].str.match(r'^(\w{3})$')]
+
+    if incorrect_acronyms.any():
+        print('Incorrect acronyms found:')
+        print(incorrect_acronyms)
+        raise Exception('Incorrect acronyms found.')
+    return
 
 def check_emails(df_answers):
     emails = df_answers['email']
@@ -114,8 +124,6 @@ def upsert_df(df: pd.DataFrame, table_name: str, engine: sqlalchemy.engine.Engin
     ON CONFLICT ({index_sql_txt}) DO UPDATE 
     SET {update_column_stmt};
     """
-    # engine.execute(query_upsert)
-    # engine.execute(f'DROP TABLE "{temp_table_name}"')
 
     with engine.connect() as con:
         con.execute(sqlalchemy.sql.text(query_upsert))
@@ -172,7 +180,7 @@ def increasing_ffill_index(df_old, df_new):
 def main():
     df_answers = read_gsheet_csv('user_info_db_load/data/data_20231101.csv')
 
-    # write_to_postgres(df_answers)
+    write_to_postgres(df_answers)
     # write_to_sqlite(df_answers)
 
 
