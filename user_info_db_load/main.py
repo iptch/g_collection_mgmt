@@ -76,7 +76,6 @@ def upsert_df(df: pd.DataFrame, table_name: str, engine: sqlalchemy.engine.Engin
     # Based on this gist, but needed to update it for sqlalchemy 2.0:
     # https://gist.github.com/pedrovgp/b46773a1240165bf2b1448b3f70bed32
 
-    # If the table does not exist, we should just use to_sql to create it
     with engine.connect() as con:
         if not con.execute(sqlalchemy.sql.text(
                 f"""SELECT EXISTS (
