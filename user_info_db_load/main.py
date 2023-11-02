@@ -85,8 +85,7 @@ def upsert_df(df: pd.DataFrame, table_name: str, engine: sqlalchemy.engine.Engin
                 AND    table_name   = '{table_name}');
                 """
         )).first()[0]:
-            df.to_sql(table_name, engine)
-            return True
+            raise Exception(f'Table {table_name} does not exist. Create it first with "python manage.py migrate"')
 
     # If it already exists...
     temp_table_name = f"temp_{uuid.uuid4().hex[:6]}"
@@ -102,20 +101,6 @@ def upsert_df(df: pd.DataFrame, table_name: str, engine: sqlalchemy.engine.Engin
 
     # col1 = exluded.col1, col2=excluded.col2
     update_column_stmt = ", ".join([f'"{col}" = EXCLUDED."{col}"' for col in columns])
-
-    # For the ON CONFLICT clause, postgres requires that the columns have unique constraint
-    query_pk = f"""
-    ALTER TABLE "{table_name}" ADD CONSTRAINT {table_name}_unique_constraint_for_upsert UNIQUE ({index_sql_txt});
-    """
-    try:
-        # engine.execute(query_pk)
-        with engine.connect() as con:
-            con.execute(sqlalchemy.sql.text(query_pk))
-            con.commit()
-    except Exception as e:
-        # relation "unique_constraint_for_upsert" already exists
-        if not 'unique_constraint_for_upsert" already exists' in e.args[0]:
-            raise e
 
     # Compose and execute upsert query
     query_upsert = f"""
@@ -159,7 +144,7 @@ def write_to_sqlite(df):
 
 def increasing_ffill_index(df_old, df_new):
     """
-    We want to keep the old indexes of the card and assign new indexes to new cards
+    We want to keep the old ids of the card and assign new ids to new cards
     """
     df_new_adjusted = df_new.merge(df_old, on='acronym', how='left')
     max_old_id = df_new_adjusted['id'].max()
