@@ -25,8 +25,8 @@ def read_gsheet_csv(path):
 
     check_emails(df_answers)
     check_acronyms(df_answers)
-
     # select only newest entry
+    df_answers['Zeitstempel'] = pd.to_datetime(df_answers['Zeitstempel'], format="%d.%m.%Y %H:%M:%S")
     df_answers = df_answers.sort_values('Zeitstempel').groupby('acronym').tail(1)
     df_answers.reset_index(drop=True, inplace=True)
 
@@ -37,6 +37,7 @@ def read_gsheet_csv(path):
 
     return df_answers
 
+
 def check_acronyms(df_answers):
     df_answers['acronym'] = df_answers['acronym'].apply(str.upper)
     incorrect_acronyms = df_answers['acronym'][~df_answers['acronym'].str.match(r'^(\w{3})$')]
@@ -46,6 +47,7 @@ def check_acronyms(df_answers):
         print(incorrect_acronyms)
         raise Exception('Incorrect acronyms found.')
     return
+
 
 def check_emails(df_answers):
     emails = df_answers['email']
@@ -162,7 +164,7 @@ def increasing_ffill_index(df_old, df_new):
 
 
 def main():
-    df_answers = read_gsheet_csv('user_info_db_load/data/data_20231101.csv')
+    df_answers = read_gsheet_csv('user_info_db_load/data/data_20231106.csv')
 
     write_to_postgres(df_answers)
     # write_to_sqlite(df_answers)
