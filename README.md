@@ -7,6 +7,8 @@ Management and util functionality for the g-collection game.
 3. Copy both CSV to `user_info_db_load/data`
 4. run `python user_info_db_load/main.py POSTGRES_PW="XXX"`
 
+## Create images with <email>.jpg name based on <acronym>.jpg
+--> image_copy/main.py
 
 ## Load Card Images
 --> Not implemented yet
